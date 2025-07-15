@@ -20,10 +20,13 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Autowired
     private DipendenteRepository dipendenteRepository;
 
-    @Override
-    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User user = super.loadUser(userRequest);
-        String email = user.getAttribute("email");
+@Override
+public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+    System.out.println(">>> loadUser() custom service attivato!");
+    OAuth2User user = super.loadUser(userRequest);
+    String email = user.getAttribute("email");
+    System.out.println("Email login: " + email);
+    // resto del codice...
 
         Optional<Dipendente> dipendenteOpt = dipendenteRepository.findByEmail(email);
         if (dipendenteOpt.isEmpty()) {
