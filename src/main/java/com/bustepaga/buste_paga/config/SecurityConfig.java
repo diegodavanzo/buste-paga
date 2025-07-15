@@ -15,28 +15,27 @@ public class SecurityConfig {
         this.customOAuth2UserService = customOAuth2UserService;
     }
 
-    @Bean
-    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        http
-            .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login**", "/error", "/access-denied").permitAll()
-                .anyRequest().authenticated()
+@Bean
+public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+    http
+        .authorizeHttpRequests(auth -> auth
+            .requestMatchers("/", "/login**", "/error").permitAll()
+            .anyRequest().authenticated()
+        )
+        .oauth2Login(oauth2 -> oauth2
+            .userInfoEndpoint(userInfo -> userInfo
+                .userService(customOAuth2UserService)
             )
-            .oauth2Login(oauth2 -> oauth2
-                .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService)
-                )
-                .defaultSuccessUrl("/home", true)
-            )
-            .exceptionHandling(exception -> exception
-                .authenticationEntryPoint((request, response, authException) -> {
-                    response.sendRedirect("/access-denied");
-                })
-            )
-            .logout(logout -> logout
-                .logoutSuccessUrl("/")
-            );
+            .failureHandler((request, response, exception) -> {
+                request.getSession().setAttribute("error.message", exception.getMessage());
+                response.sendRedirect("/error");
+            })
+            .defaultSuccessUrl("/home", true)
+        )
+        .logout(logout -> logout
+            .logoutSuccessUrl("/")
+        );
 
-        return http.build();
-    }
+    return http.build();
+}
 }
