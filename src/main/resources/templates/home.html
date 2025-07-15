@@ -1,10 +1,8 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
-<head>
-    <title>Home</title>
-</head>
+<head><title>Home</title></head>
 <body>
-    <h1>Benvenuto nella Home!</h1>
-    <p>Login effettuato con successo.</p>
+    <h1>Benvenuto, <span th:text="${#authentication.name}">utente</span>!</h1>
+    <a th:href="@{/logout}">Logout</a>
 </body>
 </html>

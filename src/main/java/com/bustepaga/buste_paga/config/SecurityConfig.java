@@ -19,8 +19,8 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println(">>> Configurazione SecurityFilterChain avviata");
-        
+        System.out.println(">>> Configurazione SecurityFilterChain");
+
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login**", "/error").permitAll()
