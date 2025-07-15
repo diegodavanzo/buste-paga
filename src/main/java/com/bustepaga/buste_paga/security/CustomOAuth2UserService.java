@@ -20,21 +20,28 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
     @Autowired
     private DipendenteRepository dipendenteRepository;
 
-@Override
-public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-    System.out.println(">>> loadUser() custom service attivato!");
-    OAuth2User user = super.loadUser(userRequest);
-    String email = user.getAttribute("email");
-    System.out.println("Email login: " + email);
-    // resto del codice...
+    @Override
+    public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
+        System.out.println("✅ [CustomOAuth2UserService] loadUser() invocato");
 
+        // Carica i dati base dall'OAuth provider (Google, etc.)
+        OAuth2User user = super.loadUser(userRequest);
+
+        // Prendi l'email restituita dal provider
+        String email = user.getAttribute("email");
+        System.out.println("📧 [CustomOAuth2UserService] Email ricevuta da OAuth2: " + email);
+
+        // Controlla se la mail esiste nel DB tra i dipendenti autorizzati
         Optional<Dipendente> dipendenteOpt = dipendenteRepository.findByEmail(email);
+
         if (dipendenteOpt.isEmpty()) {
+            System.out.println("❌ [CustomOAuth2UserService] Email NON autorizzata: " + email);
             OAuth2Error oauth2Error = new OAuth2Error("invalid_token", "Accesso negato: email non autorizzata", "");
             throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
         }
 
-        // Qui puoi restituire un wrapper personalizzato o semplicemente l'utente
+        System.out.println("✅ [CustomOAuth2UserService] Email autorizzata: accesso consentito");
+        // Puoi qui restituire un wrapper personalizzato, oppure il user così com'è
         return user;
     }
 }
