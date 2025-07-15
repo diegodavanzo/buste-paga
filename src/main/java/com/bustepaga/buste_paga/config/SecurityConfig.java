@@ -19,8 +19,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-        System.out.println(">>> Configurazione SecurityFilterChain");
-
         http
             .authorizeHttpRequests(auth -> auth
                 .requestMatchers("/", "/login**", "/error").permitAll()
@@ -35,16 +33,17 @@ public class SecurityConfig {
             )
             .logout(logout -> logout
                 .logoutSuccessUrl("/")
+                .invalidateHttpSession(true)
+                .clearAuthentication(true)
             );
 
-        System.out.println(">>> SecurityFilterChain configurata correttamente");
         return http.build();
     }
 
     @Bean
     public AuthenticationFailureHandler authenticationFailureHandler() {
         return (HttpServletRequest request, HttpServletResponse response, org.springframework.security.core.AuthenticationException exception) -> {
-            System.out.println(">>> Authentication failure: " + exception.getMessage());
+            System.out.println(">>> Errore login: " + exception.getMessage());
             request.getSession().setAttribute("error.message", exception.getMessage());
             response.sendRedirect("/error");
         };
