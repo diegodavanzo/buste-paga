@@ -5,6 +5,10 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.AuthenticationFailureHandler;
+
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 
 @Configuration
 public class SecurityConfig {
@@ -15,27 +19,32 @@ public class SecurityConfig {
         this.customOAuth2UserService = customOAuth2UserService;
     }
 
-@Bean
-public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
-    http
-        .authorizeHttpRequests(auth -> auth
-            .requestMatchers("/", "/login**", "/error").permitAll()
-            .anyRequest().authenticated()
-        )
-        .oauth2Login(oauth2 -> oauth2
-            .userInfoEndpoint(userInfo -> userInfo
-                .userService(customOAuth2UserService)
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+            .authorizeHttpRequests(auth -> auth
+                .requestMatchers("/", "/login**", "/error").permitAll()
+                .anyRequest().authenticated()
             )
-            .failureHandler((request, response, exception) -> {
-                request.getSession().setAttribute("error.message", exception.getMessage());
-                response.sendRedirect("/error");
-            })
-            .defaultSuccessUrl("/home", true)
-        )
-        .logout(logout -> logout
-            .logoutSuccessUrl("/")
-        );
+            .oauth2Login(oauth2 -> oauth2
+                .userInfoEndpoint(userInfo -> userInfo
+                    .userService(customOAuth2UserService)
+                )
+                .failureHandler(authenticationFailureHandler())
+                .defaultSuccessUrl("/home", true)
+            )
+            .logout(logout -> logout
+                .logoutSuccessUrl("/")
+            );
 
-    return http.build();
-}
+        return http.build();
+    }
+
+    @Bean
+    public AuthenticationFailureHandler authenticationFailureHandler() {
+        return (HttpServletRequest request, HttpServletResponse response, org.springframework.security.core.AuthenticationException exception) -> {
+            request.getSession().setAttribute("error.message", exception.getMessage());
+            response.sendRedirect("/error");
+        };
+    }
 }
