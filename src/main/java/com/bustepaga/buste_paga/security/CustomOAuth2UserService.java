@@ -1,38 +1,37 @@
 package com.bustepaga.buste_paga.security;
 
-import com.bustepaga.buste_paga.model.Dipendente;
-import com.bustepaga.buste_paga.service.DipendenteService;
 import org.springframework.security.oauth2.client.userinfo.DefaultOAuth2UserService;
 import org.springframework.security.oauth2.client.userinfo.OAuth2UserRequest;
 import org.springframework.security.oauth2.core.OAuth2AuthenticationException;
+import org.springframework.security.oauth2.core.OAuth2Error;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Service;
 
-import java.util.Map;
 import java.util.Optional;
+
+import com.bustepaga.buste_paga.model.Dipendente;
+import com.bustepaga.buste_paga.repository.DipendenteRepository;
+
+import org.springframework.beans.factory.annotation.Autowired;
 
 @Service
 public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
-    private final DipendenteService dipendenteService;
-
-    public CustomOAuth2UserService(DipendenteService dipendenteService) {
-        this.dipendenteService = dipendenteService;
-    }
+    @Autowired
+    private DipendenteRepository dipendenteRepository;
 
     @Override
     public OAuth2User loadUser(OAuth2UserRequest userRequest) throws OAuth2AuthenticationException {
-        OAuth2User oauth2User = super.loadUser(userRequest);
+        OAuth2User user = super.loadUser(userRequest);
+        String email = user.getAttribute("email");
 
-        Map<String, Object> attributes = oauth2User.getAttributes();
-        String email = (String) attributes.get("email");
-
-        Optional<Dipendente> dipendenteOpt = dipendenteService.findByEmail(email);
-
+        Optional<Dipendente> dipendenteOpt = dipendenteRepository.findByEmail(email);
         if (dipendenteOpt.isEmpty()) {
-            throw new OAuth2AuthenticationException("Accesso negato: email non autorizzata");
+            OAuth2Error oauth2Error = new OAuth2Error("invalid_token", "Accesso negato: email non autorizzata", "");
+            throw new OAuth2AuthenticationException(oauth2Error, oauth2Error.toString());
         }
 
-        return oauth2User;
+        // Qui puoi restituire un wrapper personalizzato o semplicemente l'utente
+        return user;
     }
 }
