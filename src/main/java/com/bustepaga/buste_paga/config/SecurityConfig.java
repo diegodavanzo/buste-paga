@@ -19,17 +19,22 @@ public class SecurityConfig {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
             .authorizeHttpRequests(auth -> auth
-                .requestMatchers("/", "/login**", "/error").permitAll()  // pagine pubbliche
-                .anyRequest().authenticated()  // tutto il resto autenticato
+                .requestMatchers("/", "/login**", "/error", "/access-denied").permitAll()
+                .anyRequest().authenticated()
             )
             .oauth2Login(oauth2 -> oauth2
                 .userInfoEndpoint(userInfo -> userInfo
-                    .userService(customOAuth2UserService) // usa il custom service
+                    .userService(customOAuth2UserService)
                 )
-                .defaultSuccessUrl("/home", true) // reindirizza dopo login riuscito
+                .defaultSuccessUrl("/home", true)
+            )
+            .exceptionHandling(exception -> exception
+                .authenticationEntryPoint((request, response, authException) -> {
+                    response.sendRedirect("/access-denied");
+                })
             )
             .logout(logout -> logout
-                .logoutSuccessUrl("/") // dove tornare al logout
+                .logoutSuccessUrl("/")
             );
 
         return http.build();

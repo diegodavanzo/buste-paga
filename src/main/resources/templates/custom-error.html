@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Errore di Accesso</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 40px;
+            text-align: center;
+        }
+        .error-container {
+            background-color: #f5c6cb;
+            border: 1px solid #f5c2c7;
+            padding: 30px;
+            border-radius: 10px;
+            display: inline-block;
+            max-width: 500px;
+            margin: auto;
+        }
+        h1 {
+            font-size: 2.5em;
+            margin-bottom: 15px;
+        }
+        p {
+            font-size: 1.2em;
+        }
+        a {
+            color: #721c24;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <div class="error-container">
+        <h1>Accesso Negato</h1>
+        <p th:text="${errorMessage}">Messaggio di errore generico</p>
+        <p><a th:href="@{/login}">Torna alla pagina di login</a></p>
+    </div>
+</body>
+</html>
