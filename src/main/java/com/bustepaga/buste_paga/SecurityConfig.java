@@ -22,6 +22,6 @@ public class SecurityConfig {
 
     @Bean
     public UserDetailsService userDetailsService() {
-        return new InMemoryUserDetailsManager(); // UserDetailsService vuoto per evitare errori
+        return new InMemoryUserDetailsManager(); // UserDetailsService vuoto per evitare error
     }
 }
